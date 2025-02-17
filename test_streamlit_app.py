@@ -38,7 +38,7 @@ def stream_data():
         time.sleep(0.02)
 
     yield pd.DataFrame(
-        np.random.randn(5,10),
+        np.random.randn(5,9),
         columns=["a", "b", "c", "d", "e", "f", "g", "i", "j"]
     )
 
