@@ -2,7 +2,10 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import altair as alt
-import time
+import time 
+from datetime import date, timedelta
+import string 
+
 
 st.write("Hello, *World !* :sunglasses: ")
 st.write(1234)
@@ -96,3 +99,76 @@ st.dataframe(
     },
     hide_index=True
 )
+
+st.write("Custom Index")
+
+df2 = pd.DataFrame({
+    "date": [date(2025,1,25), date(2025,2,21), date(2025,11,25) ],
+    "total": [12334, 4455465, 23344554]
+})
+
+df2.set_index("date", inplace=True)
+
+config = {
+    "_index": st.column_config.DateColumn("Month", format="MMM, YYYY"),
+    "total": st.column_config.NumberColumn("Total {$}")
+}
+
+st.dataframe(df2, column_config=config)
+
+
+st.write("Sales report")
+
+@st.cache_data
+def get_data():
+    product_names= ["Widget " + letter for letter in string.ascii_uppercase]
+    average_daily_sales = np.random.normal(1000, 300, len(product_names))
+    products = dict(zip(product_names, average_daily_sales))
+    data=pd.DataFrame({})
+    sales_dates=np.arange(date(2023, 1,1), date(2025, 1,1), timedelta(days=1))
+    for product, sales in products.items():
+        data[product]=np.random.normal(sales, 300, len(sales_dates)).round(2)
+
+    data.index=sales_dates
+    data.index=data.index.date
+    return data
+
+@st.fragment
+def show_daily_sales(data):
+    time.sleep(1)
+    selected_date = st.date_input(
+        "Pick a date",
+        value = date(2023,1,1),
+        min_value=date(2023,1,1),
+        max_value=date(2024,12,31),
+        key="selected_date"
+    )
+
+    if "previous_date" not in st.session_state:
+        st.session_state.previous_date = selected_date
+
+    previous_date=st.session_state.previous_date
+    st.session_state.previous_date=selected_date
+
+    is_new_month = selected_date.replace(day=1) != previous_date.replace(day=1)
+    if is_new_month:
+        st.rerun()
+
+    st.header(f"Best Sellers, {selected_date: %m/%d/%y}")
+    top_ten = data.loc[selected_date].sort_values(ascending = False)[0:10]
+    cols= st.columns([1,4])
+    cols[0].dataframe(top_ten)
+    cols[1].bar_chart(top_ten)
+
+
+    st.header(f"Worst Sellers, {selected_date: %m/%d/%y}")
+    bottom_ten = data.loc[selected_date].sort_values()[0:10]
+    cols = st.columns([1, 4])
+    cols[0].dataframe(bottom_ten)
+    cols[1].bar_chart(bottom_ten)
+
+data = get_data()
+show_daily_sales(data)
+
+
+
