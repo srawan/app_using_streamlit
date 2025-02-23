@@ -167,8 +167,27 @@ def show_daily_sales(data):
     cols[0].dataframe(bottom_ten)
     cols[1].bar_chart(bottom_ten)
 
+
+
+def show_monthly_sales(data):
+   time.sleep(1)
+   selected_date = st.session_state.selected_date
+   this_month = selected_date.replace(day=1)
+   next_month = (selected_date.replace(day=28) + timedelta(days=4)).replace(day=1)
+
+   st.header(f"Daily sales for all products, {this_month: %B %Y} ")
+   monthly_sales = data[(data.index < next_month) & (data.index >=this_month)]
+   st.write(monthly_sales)
+
+   st.header(f"Total sales of all products, {this_month: %B %Y}")
+   st.bar_chart(monthly_sales.sum())
+
+
 data = get_data()
 show_daily_sales(data)
+show_monthly_sales(data)
 
+   
+    
 
 
