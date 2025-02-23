@@ -182,6 +182,7 @@ def show_monthly_sales(data):
    st.header(f"Total sales of all products, {this_month: %B %Y}")
    st.bar_chart(monthly_sales.sum())
 
+st.set_page_config(layout="wide")
 
 data = get_data()
 show_daily_sales(data)
